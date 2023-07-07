@@ -1,5 +1,7 @@
 import { type ValidateIfUserExists } from '@/domain/usecases'
 import { CreateUserController } from '@/presentation/controllers/user'
+import { MissingParamError } from '@/presentation/errors'
+import { badRequest } from '@/presentation/helpers/http-helper'
 import { faker } from '@faker-js/faker'
 
 class ValidateIfUserExistsSpy implements ValidateIfUserExists {
@@ -12,12 +14,19 @@ class ValidateIfUserExistsSpy implements ValidateIfUserExists {
   }
 }
 
-const makeRequest = (): CreateUserController.Params => ({
-  email: faker.internet.email(),
-  name: faker.person.fullName(),
-  password: faker.internet.password(),
-  avatar: faker.image.avatar()
-})
+const makeRequest = (paramsToRemove?: string): CreateUserController.Params => {
+  const request = {
+    email: faker.internet.email(),
+    name: faker.person.fullName(),
+    password: faker.internet.password(),
+    avatar: faker.image.avatar()
+  }
+  if (paramsToRemove) {
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+    delete request[paramsToRemove]
+  }
+  return request
+}
 
 type SutTypes = {
   sut: CreateUserController
@@ -38,6 +47,16 @@ describe('CreateUser Controller', () => {
     const { sut, validateIfUserExistsSpy } = makeSut()
     expect(sut).toBeDefined()
     expect(validateIfUserExistsSpy).toBeDefined()
+  })
+
+  it('should return bad request if handle is called with invalid params', async () => {
+    const { sut } = makeSut()
+    let request = {}
+    for (const field of ['email', 'name', 'password']) {
+      request = makeRequest(field)
+      const result = await sut.handle(request as any)
+      expect(result).toEqual(badRequest(new MissingParamError(field)))
+    }
   })
 
   it('should call validateIfUserExists with correct values', async () => {
