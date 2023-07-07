@@ -1,0 +1,23 @@
+version: '3.7'
+
+networks:
+  project-sso:
+    driver: bridge
+
+services:
+  project-sso:
+    build: 
+      context: .
+      dockerfile: .docker/dockerfiles/Dockerfile
+    container_name: project-sso
+    restart: always
+    ports:
+      - 3000:3000
+    volumes:
+      - .:/usr/project-sso/app
+    environment:
+      PORT: 3000
+    networks:
+      - project-sso
+    extra_hosts:
+      - host.docker.internal:host-gateway

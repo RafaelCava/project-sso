@@ -1,0 +1,11 @@
+{
+  "name": "project-sso",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main/main.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "Rafael Cavalcante <ra.facavalcante@hotmail.com>",
+  "license": "ISC"
+}
