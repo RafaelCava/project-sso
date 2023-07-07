@@ -1,6 +1,6 @@
 import { type CreateUser, type ValidateIfUserExists } from '@/domain/usecases'
 import { type User } from '@/domain/models'
-import { EmailInUseError, UnexpectedError } from '@/presentation/errors'
+import { EmailInUseError, ServerError, UnexpectedError } from '@/presentation/errors'
 import { badRequest, conflictError, ok, serverError } from '@/presentation/helpers/http-helper'
 import { type HttpResponse, type Controller, type Validation } from '@/presentation/protocols'
 
@@ -27,7 +27,7 @@ export class CreateUserController implements Controller<CreateUserController.Par
       if (!result) return conflictError(new UnexpectedError())
       return ok(result)
     } catch (error) {
-      return serverError(error)
+      return serverError(new ServerError(error.stack))
     }
   }
 }

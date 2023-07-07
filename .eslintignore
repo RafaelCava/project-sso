@@ -5,3 +5,4 @@ dist
 data
 !src/data
 !tests/data
+coverage

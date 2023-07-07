@@ -2,7 +2,7 @@ import { type User } from '@/domain/models'
 import { type ValidateIfUserExists } from '@/domain/usecases'
 import { type CreateUser } from '@/domain/usecases/user'
 import { CreateUserController } from '@/presentation/controllers/user'
-import { EmailInUseError, InvalidParamError, MissingParamError, UnexpectedError } from '@/presentation/errors'
+import { EmailInUseError, InvalidParamError, MissingParamError, ServerError, UnexpectedError } from '@/presentation/errors'
 import { badRequest, conflictError, ok, serverError } from '@/presentation/helpers/http-helper'
 import { type Validation } from '@/presentation/protocols'
 import { faker } from '@faker-js/faker'
@@ -177,10 +177,10 @@ describe('CreateUser Controller', () => {
 
   it('should return internal server error if validateIfUserExists throws', async () => {
     const { sut, validateIfUserExistsSpy } = makeSut()
-    jest.spyOn(validateIfUserExistsSpy, 'validate').mockRejectedValueOnce(new Error())
+    jest.spyOn(validateIfUserExistsSpy, 'validate').mockRejectedValueOnce(new ServerError(new Error('any_error').stack))
     const request = makeRequest()
     const result = await sut.handle(request)
-    expect(result).toEqual(serverError(new Error()))
+    expect(result).toEqual(serverError(new ServerError(new Error('any_error').stack)))
   })
 
   it('should return bad request if validateIfUserExists returns true', async () => {

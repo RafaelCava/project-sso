@@ -3,3 +3,4 @@ data
 !src/data
 !tests/data
 dist
+coverage
