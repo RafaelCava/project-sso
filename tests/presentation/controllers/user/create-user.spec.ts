@@ -1,8 +1,9 @@
+import { type User } from '@/domain/models'
 import { type ValidateIfUserExists } from '@/domain/usecases'
 import { type CreateUser } from '@/domain/usecases/user'
 import { CreateUserController } from '@/presentation/controllers/user'
 import { EmailInUseError, InvalidParamError, MissingParamError, UnexpectedError } from '@/presentation/errors'
-import { badRequest, conflictError, serverError } from '@/presentation/helpers/http-helper'
+import { badRequest, conflictError, ok, serverError } from '@/presentation/helpers/http-helper'
 import { type Validation } from '@/presentation/protocols'
 import { faker } from '@faker-js/faker'
 
@@ -57,10 +58,10 @@ class ValidationCompositeSpy implements Validation {
 class DbCreateUserSpy implements CreateUser {
   count = 0
   params: CreateUser.Params
-  async create (data: CreateUser.Params): Promise<boolean> {
+  async create (data: CreateUser.Params): Promise<CreateUser.Result> {
     this.count++
     this.params = data
-    return Promise.resolve(true)
+    return Promise.resolve(null)
   }
 }
 
@@ -77,6 +78,16 @@ const makeRequest = (paramsToRemove?: string): CreateUserController.Params => {
   }
   return request
 }
+
+const makeUser = (): User => ({
+  email: faker.internet.email(),
+  name: faker.person.fullName(),
+  password: faker.internet.password(),
+  avatar: faker.image.avatar(),
+  createdAt: String(faker.date.recent()),
+  updatedAt: String(faker.date.recent()),
+  id: faker.string.uuid()
+})
 
 type SutTypes = {
   sut: CreateUserController
@@ -188,11 +199,19 @@ describe('CreateUser Controller', () => {
     expect(dbCreateUserSpy.params).toEqual(request)
   })
 
-  it('should return bad request if CreateUser returns false', async () => {
-    const { sut, dbCreateUserSpy } = makeSut()
-    jest.spyOn(dbCreateUserSpy, 'create').mockResolvedValueOnce(Promise.resolve(false))
+  it('should return bad request if CreateUser returns null', async () => {
+    const { sut } = makeSut()
     const request = makeRequest()
     const result = await sut.handle(request)
     expect(result).toEqual(conflictError(new UnexpectedError()))
+  })
+
+  it('should return ok if CreateUser returns user', async () => {
+    const { sut, dbCreateUserSpy } = makeSut()
+    const request = makeRequest()
+    const mockUser = makeUser()
+    jest.spyOn(dbCreateUserSpy, 'create').mockResolvedValueOnce(Promise.resolve(mockUser))
+    const result = await sut.handle(request)
+    expect(result).toEqual(ok(mockUser))
   })
 })

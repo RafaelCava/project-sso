@@ -1,3 +1,5 @@
+import { type User } from '@/domain/models'
+
 export interface CreateUser {
   create: (data: CreateUser.Params) => Promise<CreateUser.Result>
 }
@@ -10,5 +12,5 @@ export namespace CreateUser {
     avatar?: string
   }
 
-  export type Result = boolean
+  export type Result = User
 }
