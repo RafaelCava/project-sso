@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json.schemastore.org/swcrc",
+  "sourceMaps": false,
+  "exclude": [
+    "node_modules",
+    "dist"
+  ],
+  "module": {
+    "type": "commonjs"
+  },
+  "test": ".*\\.ts$",
+  "jsc": {
+    "parser": {
+      "syntax": "typescript"
+    },
+    "target": "es2019",
+    "loose": false,
+    "externalHelpers": false,
+    "keepClassNames": false
+  },
+  "minify": false
+}
