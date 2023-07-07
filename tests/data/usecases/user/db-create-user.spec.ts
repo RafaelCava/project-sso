@@ -48,4 +48,11 @@ describe('DbCreateUser', () => {
     expect(createUserRepositorySpy.count).toBe(1)
     expect(createUserRepositorySpy.params).toEqual(request)
   })
+
+  it('should throw if CreateUserRepository throws', async () => {
+    const { sut, createUserRepositorySpy } = makeSut()
+    jest.spyOn(createUserRepositorySpy, 'create').mockRejectedValueOnce(new Error())
+    const promise = sut.create(makeRequest())
+    await expect(promise).rejects.toThrow()
+  })
 })
