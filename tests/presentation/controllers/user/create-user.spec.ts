@@ -1,10 +1,10 @@
-import { type User } from '@/domain/models'
 import { type ValidateIfUserExists } from '@/domain/usecases'
 import { type CreateUser } from '@/domain/usecases/user'
 import { CreateUserController } from '@/presentation/controllers/user'
 import { EmailInUseError, InvalidParamError, MissingParamError, ServerError, UnexpectedError } from '@/presentation/errors'
 import { badRequest, conflictError, ok, serverError } from '@/presentation/helpers/http-helper'
 import { type Validation } from '@/presentation/protocols'
+import { makeUser } from '@/tests/domain/mocks'
 import { faker } from '@faker-js/faker'
 
 class ValidateIfUserExistsSpy implements ValidateIfUserExists {
@@ -78,16 +78,6 @@ const makeRequest = (paramsToRemove?: string): CreateUserController.Params => {
   }
   return request
 }
-
-const makeUser = (): User => ({
-  email: faker.internet.email(),
-  name: faker.person.fullName(),
-  password: faker.internet.password(),
-  avatar: faker.image.avatar(),
-  createdAt: String(faker.date.recent()),
-  updatedAt: String(faker.date.recent()),
-  id: faker.string.uuid()
-})
 
 type SutTypes = {
   sut: CreateUserController
