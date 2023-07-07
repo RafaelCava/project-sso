@@ -4,8 +4,13 @@
   "description": "",
   "main": "main/main.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "prepare": "husky install"
   },
   "author": "Rafael Cavalcante <ra.facavalcante@hotmail.com>",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.3"
+  }
 }
