@@ -1,8 +1,8 @@
-FROM node:18-alpine
+FROM node:16
 
 WORKDIR /usr/project-sso/app
 
-RUN apk add --no-cache git
+RUN apt-get install git -y
 
 USER node
 

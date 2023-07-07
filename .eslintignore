@@ -1,0 +1,7 @@
+node_modules
+dist
+.docker
+.husky
+data
+!src/data
+!tests/data

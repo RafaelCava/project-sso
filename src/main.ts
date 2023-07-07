@@ -1,10 +1,9 @@
-type Person = {
-  name: string
+type Pessoa = {
   age: number
 }
-const pessoa: Person = {
-  age: 30,
-  name: 'Luiz'
+
+const pessoa: Pessoa = {
+  age: 30
 }
 
-console.log(pessoa, "rafael")
+console.log(pessoa, 'teste')
