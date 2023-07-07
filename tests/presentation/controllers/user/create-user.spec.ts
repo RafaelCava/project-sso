@@ -1,6 +1,6 @@
 import { type ValidateIfUserExists } from '@/domain/usecases'
 import { CreateUserController } from '@/presentation/controllers/user'
-import { MissingParamError } from '@/presentation/errors'
+import { EmailInUseError, MissingParamError } from '@/presentation/errors'
 import { badRequest } from '@/presentation/helpers/http-helper'
 import { faker } from '@faker-js/faker'
 
@@ -10,7 +10,7 @@ class ValidateIfUserExistsSpy implements ValidateIfUserExists {
   async validate (data: ValidateIfUserExists.Params): Promise<boolean> {
     this.count++
     this.params = data
-    return Promise.resolve(true)
+    return Promise.resolve(false)
   }
 }
 
@@ -67,5 +67,13 @@ describe('CreateUser Controller', () => {
     expect(validateIfUserExistsSpy.params).toEqual({
       email: request.email
     })
+  })
+
+  it('should return bad request if validateIfUserExists returns true', async () => {
+    const { sut, validateIfUserExistsSpy } = makeSut()
+    jest.spyOn(validateIfUserExistsSpy, 'validate').mockResolvedValueOnce(Promise.resolve(true))
+    const request = makeRequest()
+    const result = await sut.handle(request)
+    expect(result).toEqual(badRequest(new EmailInUseError()))
   })
 })

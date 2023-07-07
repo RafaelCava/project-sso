@@ -1,6 +1,6 @@
 import { type ValidateIfUserExists } from '@/domain/usecases'
 import { type User } from '@/domain/usecases/models'
-import { MissingParamError } from '@/presentation/errors'
+import { EmailInUseError, MissingParamError } from '@/presentation/errors'
 import { badRequest } from '@/presentation/helpers/http-helper'
 import { type HttpResponse, type Controller } from '@/presentation/protocols'
 
@@ -12,9 +12,12 @@ export class CreateUserController implements Controller<CreateUserController.Par
         return badRequest(new MissingParamError(field))
       }
     }
-    await this.validateIfUserExists.validate({
+    const existsUser = await this.validateIfUserExists.validate({
       email: data.email
     })
+    if (existsUser) {
+      return badRequest(new EmailInUseError())
+    }
     return null
   }
 }
