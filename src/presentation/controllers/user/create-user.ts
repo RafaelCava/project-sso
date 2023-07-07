@@ -1,7 +1,7 @@
 import { type ValidateIfUserExists } from '@/domain/usecases'
 import { type User } from '@/domain/usecases/models'
 import { EmailInUseError } from '@/presentation/errors'
-import { badRequest } from '@/presentation/helpers/http-helper'
+import { badRequest, serverError } from '@/presentation/helpers/http-helper'
 import { type HttpResponse, type Controller, type Validation } from '@/presentation/protocols'
 
 export class CreateUserController implements Controller<CreateUserController.Params, CreateUserController.Result> {
@@ -11,17 +11,21 @@ export class CreateUserController implements Controller<CreateUserController.Par
   ) {}
 
   async handle (data: CreateUserController.Params): Promise<CreateUserController.Result> {
-    const error = this.validation.validate(data)
-    if (error) {
-      return badRequest(error)
+    try {
+      const error = this.validation.validate(data)
+      if (error) {
+        return badRequest(error)
+      }
+      const existsUser = await this.validateIfUserExists.validate({
+        email: data.email
+      })
+      if (existsUser) {
+        return badRequest(new EmailInUseError())
+      }
+      return null
+    } catch (error) {
+      return serverError(error)
     }
-    const existsUser = await this.validateIfUserExists.validate({
-      email: data.email
-    })
-    if (existsUser) {
-      return badRequest(new EmailInUseError())
-    }
-    return null
   }
 }
 
