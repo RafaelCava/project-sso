@@ -10,7 +10,11 @@
   "author": "Rafael Cavalcante <ra.facavalcante@hotmail.com>",
   "license": "ISC",
   "devDependencies": {
+    "@commitlint/cli": "^17.6.6",
+    "@commitlint/config-conventional": "^17.6.6",
     "husky": "^8.0.3",
-    "lint-staged": "^13.2.3"
+    "lint-staged": "^13.2.3",
+    "tsc": "^2.0.4",
+    "typescript": "^5.1.6"
   }
 }
