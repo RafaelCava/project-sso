@@ -1,16 +1,19 @@
 import { type ValidateIfUserExists } from '@/domain/usecases'
 import { type User } from '@/domain/usecases/models'
-import { EmailInUseError, MissingParamError } from '@/presentation/errors'
+import { EmailInUseError } from '@/presentation/errors'
 import { badRequest } from '@/presentation/helpers/http-helper'
-import { type HttpResponse, type Controller } from '@/presentation/protocols'
+import { type HttpResponse, type Controller, type Validation } from '@/presentation/protocols'
 
 export class CreateUserController implements Controller<CreateUserController.Params, CreateUserController.Result> {
-  constructor (private readonly validateIfUserExists: ValidateIfUserExists) {}
+  constructor (
+    private readonly validation: Validation,
+    private readonly validateIfUserExists: ValidateIfUserExists
+  ) {}
+
   async handle (data: CreateUserController.Params): Promise<CreateUserController.Result> {
-    for (const field of ['email', 'name', 'password']) {
-      if (!data[field]) {
-        return badRequest(new MissingParamError(field))
-      }
+    const error = this.validation.validate(data)
+    if (error) {
+      return badRequest(error)
     }
     const existsUser = await this.validateIfUserExists.validate({
       email: data.email

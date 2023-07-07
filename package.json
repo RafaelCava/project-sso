@@ -16,7 +16,10 @@
     "build:compile": "swc src -d dist --source-maps --config-file .swcrc -s inline",
     "build": "rimraf dist && npm run build:compile"
   },
-  "author": "Rafael Cavalcante <ra.facavalcante@hotmail.com>",
+  "author": {
+    "email": "ra.facavalcante@hotmail.com",
+    "name": "Rafael Cavalcante"
+  },
   "license": "ISC",
   "devDependencies": {
     "@commitlint/cli": "^17.6.6",
