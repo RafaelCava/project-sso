@@ -1,5 +1,5 @@
-import { type ValidateIfUserExists } from '@/domain/usecases'
-import { type User } from '@/domain/usecases/models'
+import { type CreateUser, type ValidateIfUserExists } from '@/domain/usecases'
+import { type User } from '@/domain/models'
 import { EmailInUseError } from '@/presentation/errors'
 import { badRequest, serverError } from '@/presentation/helpers/http-helper'
 import { type HttpResponse, type Controller, type Validation } from '@/presentation/protocols'
@@ -7,7 +7,8 @@ import { type HttpResponse, type Controller, type Validation } from '@/presentat
 export class CreateUserController implements Controller<CreateUserController.Params, CreateUserController.Result> {
   constructor (
     private readonly validation: Validation,
-    private readonly validateIfUserExists: ValidateIfUserExists
+    private readonly validateIfUserExists: ValidateIfUserExists,
+    private readonly createUser: CreateUser
   ) {}
 
   async handle (data: CreateUserController.Params): Promise<CreateUserController.Result> {
@@ -22,6 +23,7 @@ export class CreateUserController implements Controller<CreateUserController.Par
       if (existsUser) {
         return badRequest(new EmailInUseError())
       }
+      await this.createUser.create(data)
       return null
     } catch (error) {
       return serverError(error)

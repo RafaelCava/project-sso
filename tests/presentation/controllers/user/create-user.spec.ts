@@ -1,4 +1,5 @@
 import { type ValidateIfUserExists } from '@/domain/usecases'
+import { type CreateUser } from '@/domain/usecases/user'
 import { CreateUserController } from '@/presentation/controllers/user'
 import { EmailInUseError, InvalidParamError, MissingParamError } from '@/presentation/errors'
 import { badRequest, serverError } from '@/presentation/helpers/http-helper'
@@ -53,6 +54,16 @@ class ValidationCompositeSpy implements Validation {
   }
 }
 
+class DbCreateUserSpy implements CreateUser {
+  count = 0
+  params: CreateUser.Params
+  async create (data: CreateUser.Params): Promise<boolean> {
+    this.count++
+    this.params = data
+    return Promise.resolve(true)
+  }
+}
+
 const makeRequest = (paramsToRemove?: string): CreateUserController.Params => {
   const request = {
     email: faker.internet.email(),
@@ -75,6 +86,7 @@ type SutTypes = {
   requiredFieldEmailValidationSpy: RequiredFieldValidationSpy
   requiredFieldNameValidationSpy: RequiredFieldValidationSpy
   requiredFieldPasswordValidationSpy: RequiredFieldValidationSpy
+  dbCreateUserSpy: DbCreateUserSpy
 }
 
 const makeSut = (): SutTypes => {
@@ -84,7 +96,8 @@ const makeSut = (): SutTypes => {
   const requiredFieldPasswordValidationSpy = new RequiredFieldValidationSpy('password')
   const validationSpy = new ValidationCompositeSpy([requiredFieldEmailValidationSpy, requiredFieldNameValidationSpy, requiredFieldPasswordValidationSpy, emailValidationSpy])
   const validateIfUserExistsSpy = new ValidateIfUserExistsSpy()
-  const sut = new CreateUserController(validationSpy, validateIfUserExistsSpy)
+  const dbCreateUserSpy = new DbCreateUserSpy()
+  const sut = new CreateUserController(validationSpy, validateIfUserExistsSpy, dbCreateUserSpy)
   return {
     sut,
     validationSpy,
@@ -92,7 +105,8 @@ const makeSut = (): SutTypes => {
     emailValidationSpy,
     requiredFieldEmailValidationSpy,
     requiredFieldNameValidationSpy,
-    requiredFieldPasswordValidationSpy
+    requiredFieldPasswordValidationSpy,
+    dbCreateUserSpy
   }
 }
 
@@ -105,7 +119,8 @@ describe('CreateUser Controller', () => {
       requiredFieldEmailValidationSpy,
       requiredFieldNameValidationSpy,
       requiredFieldPasswordValidationSpy,
-      validationSpy
+      validationSpy,
+      dbCreateUserSpy
     } = makeSut()
     expect(sut).toBeDefined()
     expect(validateIfUserExistsSpy).toBeDefined()
@@ -114,6 +129,7 @@ describe('CreateUser Controller', () => {
     expect(requiredFieldNameValidationSpy).toBeDefined()
     expect(requiredFieldPasswordValidationSpy).toBeDefined()
     expect(validationSpy).toBeDefined()
+    expect(dbCreateUserSpy).toBeDefined()
   })
 
   it('should return bad request if handle is called with invalid params', async () => {
@@ -162,5 +178,13 @@ describe('CreateUser Controller', () => {
     const request = makeRequest()
     const result = await sut.handle(request)
     expect(result).toEqual(badRequest(new EmailInUseError()))
+  })
+
+  it('should call CreateUser with correct values', async () => {
+    const { sut, dbCreateUserSpy } = makeSut()
+    const request = makeRequest()
+    await sut.handle(request)
+    expect(dbCreateUserSpy.count).toBe(1)
+    expect(dbCreateUserSpy.params).toEqual(request)
   })
 })
