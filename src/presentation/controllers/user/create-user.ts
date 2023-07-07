@@ -1,7 +1,7 @@
 import { type CreateUser, type ValidateIfUserExists } from '@/domain/usecases'
 import { type User } from '@/domain/models'
-import { EmailInUseError } from '@/presentation/errors'
-import { badRequest, serverError } from '@/presentation/helpers/http-helper'
+import { EmailInUseError, UnexpectedError } from '@/presentation/errors'
+import { badRequest, conflictError, serverError } from '@/presentation/helpers/http-helper'
 import { type HttpResponse, type Controller, type Validation } from '@/presentation/protocols'
 
 export class CreateUserController implements Controller<CreateUserController.Params, CreateUserController.Result> {
@@ -23,7 +23,8 @@ export class CreateUserController implements Controller<CreateUserController.Par
       if (existsUser) {
         return badRequest(new EmailInUseError())
       }
-      await this.createUser.create(data)
+      const result = await this.createUser.create(data)
+      if (!result) return conflictError(new UnexpectedError())
       return null
     } catch (error) {
       return serverError(error)

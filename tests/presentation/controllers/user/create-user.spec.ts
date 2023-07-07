@@ -1,8 +1,8 @@
 import { type ValidateIfUserExists } from '@/domain/usecases'
 import { type CreateUser } from '@/domain/usecases/user'
 import { CreateUserController } from '@/presentation/controllers/user'
-import { EmailInUseError, InvalidParamError, MissingParamError } from '@/presentation/errors'
-import { badRequest, serverError } from '@/presentation/helpers/http-helper'
+import { EmailInUseError, InvalidParamError, MissingParamError, UnexpectedError } from '@/presentation/errors'
+import { badRequest, conflictError, serverError } from '@/presentation/helpers/http-helper'
 import { type Validation } from '@/presentation/protocols'
 import { faker } from '@faker-js/faker'
 
@@ -186,5 +186,13 @@ describe('CreateUser Controller', () => {
     await sut.handle(request)
     expect(dbCreateUserSpy.count).toBe(1)
     expect(dbCreateUserSpy.params).toEqual(request)
+  })
+
+  it('should return bad request if CreateUser returns false', async () => {
+    const { sut, dbCreateUserSpy } = makeSut()
+    jest.spyOn(dbCreateUserSpy, 'create').mockResolvedValueOnce(Promise.resolve(false))
+    const request = makeRequest()
+    const result = await sut.handle(request)
+    expect(result).toEqual(conflictError(new UnexpectedError()))
   })
 })
