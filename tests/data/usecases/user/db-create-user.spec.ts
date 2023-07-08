@@ -15,8 +15,10 @@ class CreateUserRepositorySpy implements CreateUserRepository {
 
 class HasherSpy implements Hasher {
   count = 0
+  params?: string
   async hash (plaintext: string): Promise<string> {
     this.count++
+    this.params = plaintext
     return Promise.resolve(faker.string.uuid())
   }
 }
@@ -55,11 +57,10 @@ describe('DbCreateUser', () => {
 
   it('should call Hasher with correct values', async () => {
     const { sut, hasherSpy } = makeSut()
-    const hashSpy = jest.spyOn(hasherSpy, 'hash')
     const request = makeRequest()
     await sut.create(request)
     expect(hasherSpy.count).toBe(1)
-    expect(hashSpy).toHaveBeenCalledWith(request.password)
+    expect(hasherSpy.params).toBe(request.password)
   })
 
   it('should throw if Hasher throws', async () => {
