@@ -1,4 +1,4 @@
-import { type CreateUserRepository } from '@/data/protocols'
+import { type Hasher, type CreateUserRepository } from '@/data/protocols'
 import { DbCreateUser } from '@/data/usecases'
 import { makeUser } from '@/tests/domain/mocks'
 import { faker } from '@faker-js/faker'
@@ -13,16 +13,29 @@ class CreateUserRepositorySpy implements CreateUserRepository {
   }
 }
 
+class HasherSpy implements Hasher {
+  count = 0
+  plaintext?: string
+  async hash (plaintext: string): Promise<string> {
+    this.count++
+    this.plaintext = plaintext
+    return Promise.resolve(faker.string.uuid())
+  }
+}
+
 type SutTypes = {
   sut: DbCreateUser
   createUserRepositorySpy: CreateUserRepositorySpy
+  hasherSpy: HasherSpy
 }
 
 const makeSut = (): SutTypes => {
   const createUserRepositorySpy = new CreateUserRepositorySpy()
-  const sut = new DbCreateUser(createUserRepositorySpy)
+  const hasherSpy = new HasherSpy()
+  const sut = new DbCreateUser(hasherSpy, createUserRepositorySpy)
   return {
     sut,
+    hasherSpy,
     createUserRepositorySpy
   }
 }
@@ -36,9 +49,18 @@ const makeRequest = (): CreateUserRepository.Params => ({
 
 describe('DbCreateUser', () => {
   it('should be defined', () => {
-    const { sut, createUserRepositorySpy } = makeSut()
+    const { sut, createUserRepositorySpy, hasherSpy } = makeSut()
     expect(sut).toBeDefined()
     expect(createUserRepositorySpy).toBeDefined()
+    expect(hasherSpy).toBeDefined()
+  })
+
+  it('should call Hasher with correct values', async () => {
+    const { sut, hasherSpy } = makeSut()
+    const request = makeRequest()
+    await sut.create(request)
+    expect(hasherSpy.count).toBe(1)
+    expect(hasherSpy.plaintext).toBe(request.password)
   })
 
   it('should call CreateUserRepository with correct values', async () => {
