@@ -71,9 +71,10 @@ describe('DbCreateUser', () => {
   })
 
   it('should call CreateUserRepository with correct values', async () => {
-    const { sut, createUserRepositorySpy } = makeSut()
+    const { sut, createUserRepositorySpy, hasherSpy } = makeSut()
     const request = makeRequest()
     await sut.create(request)
+    request.password = await hasherSpy.hash(request.password)
     expect(createUserRepositorySpy.count).toBe(1)
     expect(createUserRepositorySpy.params).toEqual(request)
   })
