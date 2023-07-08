@@ -63,6 +63,13 @@ describe('DbCreateUser', () => {
     expect(hasherSpy.plaintext).toBe(request.password)
   })
 
+  it('should throw if Hasher throws', async () => {
+    const { sut, hasherSpy } = makeSut()
+    jest.spyOn(hasherSpy, 'hash').mockRejectedValueOnce(new Error())
+    const promise = sut.create(makeRequest())
+    await expect(promise).rejects.toThrow()
+  })
+
   it('should call CreateUserRepository with correct values', async () => {
     const { sut, createUserRepositorySpy } = makeSut()
     const request = makeRequest()
