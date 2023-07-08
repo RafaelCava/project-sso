@@ -12,5 +12,5 @@ export namespace CreateUser {
     avatar?: string
   }
 
-  export type Result = User
+  export type Result = Omit<User, 'password'>
 }

@@ -15,10 +15,8 @@ class CreateUserRepositorySpy implements CreateUserRepository {
 
 class HasherSpy implements Hasher {
   count = 0
-  plaintext?: string
   async hash (plaintext: string): Promise<string> {
     this.count++
-    this.plaintext = plaintext
     return Promise.resolve(faker.string.uuid())
   }
 }
@@ -57,10 +55,11 @@ describe('DbCreateUser', () => {
 
   it('should call Hasher with correct values', async () => {
     const { sut, hasherSpy } = makeSut()
+    const hashSpy = jest.spyOn(hasherSpy, 'hash')
     const request = makeRequest()
     await sut.create(request)
     expect(hasherSpy.count).toBe(1)
-    expect(hasherSpy.plaintext).toBe(request.password)
+    expect(hashSpy).toHaveBeenCalledWith(request.password)
   })
 
   it('should throw if Hasher throws', async () => {
@@ -73,10 +72,14 @@ describe('DbCreateUser', () => {
   it('should call CreateUserRepository with correct values', async () => {
     const { sut, createUserRepositorySpy, hasherSpy } = makeSut()
     const request = makeRequest()
+    const hash = await hasherSpy.hash(request.password)
+    jest.spyOn(hasherSpy, 'hash').mockResolvedValueOnce(Promise.resolve(hash))
     await sut.create(request)
-    request.password = await hasherSpy.hash(request.password)
     expect(createUserRepositorySpy.count).toBe(1)
-    expect(createUserRepositorySpy.params).toEqual(request)
+    expect(createUserRepositorySpy.params).toEqual({
+      ...request,
+      password: hash
+    })
   })
 
   it('should throw if CreateUserRepository throws', async () => {
@@ -84,5 +87,15 @@ describe('DbCreateUser', () => {
     jest.spyOn(createUserRepositorySpy, 'create').mockRejectedValueOnce(new Error())
     const promise = sut.create(makeRequest())
     await expect(promise).rejects.toThrow()
+  })
+
+  it('should return an user without password on success', async () => {
+    const { sut, createUserRepositorySpy } = makeSut()
+    const request = makeRequest()
+    const mockUser = makeUser()
+    jest.spyOn(createUserRepositorySpy, 'create').mockResolvedValueOnce(Promise.resolve(mockUser))
+    const response = await sut.create(request)
+    delete mockUser.password
+    expect(response).toEqual(mockUser)
   })
 })
