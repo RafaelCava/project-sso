@@ -48,4 +48,16 @@ describe('CreateUserMongoRepository', () => {
     expect(createSpy).toHaveBeenCalledTimes(1)
     expect(createSpy).toHaveBeenCalledWith(request)
   })
+
+  it('should throw if create throws', async () => {
+    const sut = makeSut()
+    jest.spyOn(userModel, 'create').mockReturnValueOnce(Promise.reject(new Error('unexpected')))
+    const promise = sut.create({
+      email: faker.internet.email(),
+      name: faker.person.fullName(),
+      password: faker.internet.password(),
+      avatar: faker.internet.avatar()
+    })
+    await expect(promise).rejects.toThrow(new Error('unexpected'))
+  })
 })
