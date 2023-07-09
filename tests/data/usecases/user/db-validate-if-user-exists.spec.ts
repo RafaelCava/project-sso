@@ -52,4 +52,11 @@ describe('DbValidateIfUserExists', () => {
     const promise = sut.validate({ email: faker.internet.email() })
     await expect(promise).rejects.toThrow(new Error('unexpected error'))
   })
+
+  it('should return false if findOneUserRepository returns null', async () => {
+    const { sut, findOneUserRepositorySpy } = makeSut()
+    jest.spyOn(findOneUserRepositorySpy, 'findOne').mockResolvedValueOnce(Promise.resolve(null))
+    const result = await sut.validate({ email: faker.internet.email() })
+    expect(result).toBe(false)
+  })
 })
