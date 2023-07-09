@@ -27,7 +27,7 @@ export class MongoHelper {
 
   static map (collection: any): any {
     if (collection.length) {
-      return collection.map((c: any) => MongoHelper.map(c))
+      return collection.map((document: any) => MongoHelper.map(document))
     }
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { _id, __v, ...collectionWithoutId } = collection
