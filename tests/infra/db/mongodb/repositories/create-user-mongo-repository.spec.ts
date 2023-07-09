@@ -4,6 +4,7 @@ import { type Model } from 'mongoose'
 import { UserSchema } from '@/infra/db/mongodb/schemas'
 import { type User } from '@/domain/models'
 import Mockdate from 'mockdate'
+import { faker } from '@faker-js/faker'
 
 const makeSut = (): CreateUserMongoRepository => {
   return new CreateUserMongoRepository()
@@ -32,5 +33,19 @@ describe('CreateUserMongoRepository', () => {
   it('should be defined', async () => {
     const sut = makeSut()
     expect(sut).toBeDefined()
+  })
+
+  it('should call create with correct values', async () => {
+    const sut = makeSut()
+    const createSpy = jest.spyOn(userModel, 'create')
+    const request = {
+      email: faker.internet.email(),
+      name: faker.person.fullName(),
+      password: faker.internet.password(),
+      avatar: faker.internet.avatar()
+    }
+    await sut.create(request)
+    expect(createSpy).toHaveBeenCalledTimes(1)
+    expect(createSpy).toHaveBeenCalledWith(request)
   })
 })

@@ -7,7 +7,7 @@
     "start": "node dist/main/server.js",
     "start:debug": "nodemon -L --watch ./dist --inspect=0.0.0.0:9222 -r source-map-support/register ./dist/main/server.js --nolazy ./dist/main/server.js",
     "start:dev": "sucrase-node src/main/server.ts",
-    "test": "jest --passWithNoTests --runInBand",
+    "test": "jest --passWithNoTests --silent --noStackTrace --runInBand",
     "test:cov": "npm test -- --coverage",
     "test:unit": "npm test -- --watch -c jest-unit.config.ts",
     "test:integration": "npm test -- --watch -c jest-integration.config.ts",
