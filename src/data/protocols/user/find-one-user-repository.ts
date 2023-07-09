@@ -1,7 +1,7 @@
 import { type User } from '@/domain/models'
 
 export interface FindOneUserRepository {
-  findOne: (query: FindOneUserRepository.Query, projection: FindOneUserRepository.Projection) => FindOneUserRepository.Result
+  findOne: (query: FindOneUserRepository.Query, projection?: FindOneUserRepository.Projection) => FindOneUserRepository.Result
 }
 
 export namespace FindOneUserRepository {
