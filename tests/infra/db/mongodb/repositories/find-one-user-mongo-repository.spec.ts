@@ -39,4 +39,38 @@ describe('FindOneUserMongoRepository', () => {
     const result = await sut.findOne({ email: faker.internet.email() }, { id: 1 })
     expect(result).toBeNull()
   })
+
+  it('should return user if findOne returns user with only data requested on projection', async () => {
+    const sut = makeSut()
+    const user = await userModel.create({
+      email: faker.internet.email(),
+      name: faker.person.fullName(),
+      password: faker.internet.password(),
+      avatar: faker.internet.avatar()
+    })
+    const result = await sut.findOne({ email: user.email }, { id: 1 })
+    expect(result).toMatchObject({
+      id: user.id
+    })
+  })
+
+  it('should return user if findOne returns user with all data if no projection are provided', async () => {
+    const sut = makeSut()
+    const user = await userModel.create({
+      email: faker.internet.email(),
+      name: faker.person.fullName(),
+      password: faker.internet.password(),
+      avatar: faker.internet.avatar()
+    })
+    const result = await sut.findOne({ email: user.email })
+    expect(result).toMatchObject({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      password: user.password,
+      avatar: user.avatar,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    })
+  })
 })
