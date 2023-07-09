@@ -1,5 +1,18 @@
+import { DbValidateIfUserExists } from '@/data/usecases'
+
+type SutTypes = {
+  sut: DbValidateIfUserExists
+}
+const makeSut = (): SutTypes => {
+  const sut = new DbValidateIfUserExists()
+  return {
+    sut
+  }
+}
+
 describe('DbValidateIfUserExists', () => {
   it('should be defined', () => {
-    expect(1).toBe(1)
+    const { sut } = makeSut()
+    expect(sut).toBeDefined()
   })
 })
