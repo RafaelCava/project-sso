@@ -17,16 +17,6 @@ export function ok<T> (body: T): HttpResponse<T> {
   }
 }
 
-export const forbidden = (error: Error): HttpResponse<Error> => ({
-  statusCode: 403,
-  body: error
-})
-
-export const unauthorized = (error: Error): HttpResponse<Error> => ({
-  statusCode: 401,
-  body: error
-})
-
 export const conflictError = (error: Error): HttpResponse<Error> => ({
   statusCode: 409,
   body: error

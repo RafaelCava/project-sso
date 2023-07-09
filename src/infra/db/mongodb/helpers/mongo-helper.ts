@@ -11,23 +11,24 @@ export class MongoHelper {
     if (MongoHelper.client.connection.readyState === 1) {
       return true
     } else {
-      MongoHelper.client = null
       return false
     }
   }
 
   static async disconnect (): Promise<void> {
     await MongoHelper.client.disconnect()
-    MongoHelper.client = null
   }
 
-  static async getModel (name: string, schema?: mongoose.Schema): Promise<mongoose.Model<any>> {
+  static async getModel (name: string, schema: mongoose.Schema): Promise<mongoose.Model<any>> {
+    if (!MongoHelper.isConnected()) {
+      await MongoHelper.connect(process.env.MONGO_URL)
+    }
     return MongoHelper.client.connection.model(name, schema)
   }
 
-  static map (collection: any): any {
+  static map<Model = any> (collection: any): Model {
     if (collection.length) {
-      return collection.map((document: any) => MongoHelper.map(document))
+      return collection.map((document: Model) => MongoHelper.map(document))
     }
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { _id, __v, ...collectionWithoutId } = collection
