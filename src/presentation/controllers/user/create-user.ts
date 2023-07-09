@@ -40,5 +40,5 @@ export namespace CreateUserController {
     avatar?: string
   }
 
-  export type Result = HttpResponse<User | Error>
+  export type Result = HttpResponse<Omit<User, 'password'> | Error>
 }
