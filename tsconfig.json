@@ -23,7 +23,9 @@
   "include": [
     "src",
     "tests",
-    "jest**"
+    "jest**",
+    "**.config.ts",
+    "**.config.js",
   ],
   "exclude": []
 }
