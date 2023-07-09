@@ -5,10 +5,18 @@ import { UserSchema } from '@/infra/db/mongodb/schemas'
 import { type User } from '@/domain/models'
 import Mockdate from 'mockdate'
 import { faker } from '@faker-js/faker'
+import { type CreateUserRepository } from '@/data/protocols'
 
 const makeSut = (): CreateUserMongoRepository => {
   return new CreateUserMongoRepository()
 }
+
+const makeRequest = (): CreateUserRepository.Params => ({
+  email: faker.internet.email(),
+  name: faker.person.fullName(),
+  password: faker.internet.password(),
+  avatar: faker.internet.avatar()
+})
 
 describe('CreateUserMongoRepository', () => {
   let userModel: Model<User>
@@ -38,12 +46,7 @@ describe('CreateUserMongoRepository', () => {
   it('should call create with correct values', async () => {
     const sut = makeSut()
     const createSpy = jest.spyOn(userModel, 'create')
-    const request = {
-      email: faker.internet.email(),
-      name: faker.person.fullName(),
-      password: faker.internet.password(),
-      avatar: faker.internet.avatar()
-    }
+    const request = makeRequest()
     await sut.create(request)
     expect(createSpy).toHaveBeenCalledTimes(1)
     expect(createSpy).toHaveBeenCalledWith(request)
@@ -52,12 +55,19 @@ describe('CreateUserMongoRepository', () => {
   it('should throw if create throws', async () => {
     const sut = makeSut()
     jest.spyOn(userModel, 'create').mockReturnValueOnce(Promise.reject(new Error('unexpected')))
-    const promise = sut.create({
-      email: faker.internet.email(),
-      name: faker.person.fullName(),
-      password: faker.internet.password(),
-      avatar: faker.internet.avatar()
-    })
+    const promise = sut.create(makeRequest())
     await expect(promise).rejects.toThrow(new Error('unexpected'))
+  })
+
+  it('should return user with correct format on success', async () => {
+    const sut = makeSut()
+    const request = makeRequest()
+    const user = await sut.create(request)
+    expect(user).toEqual({
+      ...request,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      id: expect.any(String)
+    })
   })
 })

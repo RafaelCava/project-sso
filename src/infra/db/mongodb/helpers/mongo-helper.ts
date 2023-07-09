@@ -29,7 +29,8 @@ export class MongoHelper {
     if (collection.length) {
       return collection.map((c: any) => MongoHelper.map(c))
     }
-    const { _id, ...collectionWithoutId } = collection
-    return Object.assign({}, collectionWithoutId, { id: _id })
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { _id, __v, ...collectionWithoutId } = collection
+    return Object.assign({}, collectionWithoutId, { id: String(_id) })
   }
 }
