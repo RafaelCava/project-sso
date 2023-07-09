@@ -59,4 +59,10 @@ describe('DbValidateIfUserExists', () => {
     const result = await sut.validate({ email: faker.internet.email() })
     expect(result).toBe(false)
   })
+
+  it('should return true if findOneUserRepository returns a user', async () => {
+    const { sut } = makeSut()
+    const result = await sut.validate({ email: faker.internet.email() })
+    expect(result).toBe(true)
+  })
 })
