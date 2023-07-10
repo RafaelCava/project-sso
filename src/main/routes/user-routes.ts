@@ -4,4 +4,5 @@ import { makeCreateUserController } from '../factories/controllers'
 
 export default (router: Router): void => {
   router.post('/create', adaptRoute(makeCreateUserController()))
+  router.use('/user', router)
 }

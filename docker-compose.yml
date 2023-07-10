@@ -17,7 +17,22 @@ services:
       - .:/usr/project-sso/app
     environment:
       PORT: 3000
+      MONGO_URL: mongodb://root:root@host.docker.internal/project-sso?authSource=admin
     networks:
       - project-sso
     extra_hosts:
       - host.docker.internal:host-gateway
+  
+  mongo:
+    image: mongo
+    container_name: project-sso-mongo
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - ./data:/data/db
+    networks:
+      - project-sso
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root

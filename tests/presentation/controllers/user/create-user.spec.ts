@@ -173,12 +173,12 @@ describe('CreateUser Controller', () => {
     expect(result).toEqual(serverError(new ServerError(new Error('any_error').stack)))
   })
 
-  it('should return bad request if validateIfUserExists returns true', async () => {
+  it('should return conflict if validateIfUserExists returns true', async () => {
     const { sut, validateIfUserExistsSpy } = makeSut()
     jest.spyOn(validateIfUserExistsSpy, 'validate').mockResolvedValueOnce(Promise.resolve(true))
     const request = makeRequest()
     const result = await sut.handle(request)
-    expect(result).toEqual(badRequest(new EmailInUseError()))
+    expect(result).toEqual(conflictError(new EmailInUseError()))
   })
 
   it('should call CreateUser with correct values', async () => {

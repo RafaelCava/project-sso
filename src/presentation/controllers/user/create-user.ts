@@ -21,7 +21,7 @@ export class CreateUserController implements Controller<CreateUserController.Par
         email: data.email
       })
       if (existsUser) {
-        return badRequest(new EmailInUseError())
+        return conflictError(new EmailInUseError())
       }
       const result = await this.createUser.create(data)
       if (!result) return conflictError(new UnexpectedError())
